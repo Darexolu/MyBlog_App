@@ -2,3 +2,15 @@
 // for details on configuring this project to bundle and minify static web assets.
 
 // Write your JavaScript code.
+function deletePost(i) {
+    $.ajax({
+        url: '/Posts/Delete',
+        type: 'Post',
+        data: {
+            id: 1
+        }
+    }).then(function (data) {
+        window.location = "/Posts";
+    }
+    );
+}

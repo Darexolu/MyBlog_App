@@ -1,0 +1,47 @@
+﻿@model PostViewModel
+   <partial name="_Notifications" />  
+ @if (TempData["ShowToastr"] != null && (bool)TempData["ShowToastr"])
+{
+    <script>
+        $(document).ready(function () {
+            toastr.success('@TempData["PostDeleted"]');
+        });
+    </script>
+} 
+@* 
+<div class="d-flex justify-content-end"><h4 class="text-light bg-success border-1 rounded-2">@TempData["PostDeleted"]</h4></div>
+ *@<div class="text-center">
+    <h1 class="display-4">My latest Posts</h1>
+</div>
+<div class="text-right">
+    <a asp-controller="Posts" asp-action="NewPost">New Post</a>
+</div>
+<div class="row justify-content-center">
+    <div class="col-xl-6 col-lg-8 col-md-8 col-sm-10">
+        <div class="posts-container">
+            @foreach(var p in Model.PostList)
+            {
+                <div class="post">
+                    <h2><a asp-area="" asp-controller="Posts" asp-action="ViewPost" asp-route-id="@p.Id">@p.Title</a></h2>
+                    <h5 class="text-muted">@p.UpdatedAt</h5>
+                     <div class="post-body">
+            <p class="summary">@Html.Raw(p.Body.Substring(0, Math.Min(p.Body.Length, 100)))</p>
+            <p class="full-body" style="display: none;">@p.Body</p>
+            <a href="#" class="toggle-body">Read more</a>
+        </div>
+                </div>
+            }
+
+        </div>
+    </div>
+</div>
+@section scripts {
+    <script>
+        // JavaScript to toggle post body visibility
+        $(document).ready(function () {
+            $(".toggle-body").click(function () {
+                $(this).prev(".full-body").toggle();
+            });
+        });
+    </script>
+}
