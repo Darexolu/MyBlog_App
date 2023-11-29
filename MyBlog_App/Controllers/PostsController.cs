@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using MyBlog_App.Data;
 using MyBlog_App.Models;
 using MyBlog_App.Models.ViewModels;
 using System.Diagnostics;
+using Microsoft.Extensions.Hosting.Internal;
 
 namespace MyBlog_App.Controllers
 {
@@ -12,11 +14,14 @@ namespace MyBlog_App.Controllers
     {
         private readonly ILogger<PostsController> _logger;
         private readonly AppDbContext _dbContext;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public PostsController(ILogger<PostsController> logger, AppDbContext dbcontext)
+        public PostsController(ILogger<PostsController> logger, AppDbContext dbcontext,
+            IWebHostEnvironment webHostEnvironment)
         {
             _logger = logger;
             _dbContext = dbcontext;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         public IActionResult Index()
@@ -35,6 +40,7 @@ namespace MyBlog_App.Controllers
                     Id = post.Id,
                     Title = post.Title,
                     Body = post.Body,
+                    ImageUrl = post.ImageUrl,
                     CreatedAt = post.CreatedAt,
                     UpdatedAt = post.UpdatedAt
                 }).ToList()
@@ -44,7 +50,12 @@ namespace MyBlog_App.Controllers
         }
         public IActionResult NewPost()
         {
-            return View();
+            var postViewModel = new PostViewModel
+            {
+                Post = new PostModel() // Initialize an empty PostModel
+            };
+
+            return View(postViewModel);
         }
         public IActionResult ViewPost(int id)
         {
@@ -93,29 +104,80 @@ namespace MyBlog_App.Controllers
         }
 
         [HttpPost]
-        public IActionResult Insert(PostViewModel newPost)
+        public IActionResult Insert(PostViewModel newPost, IFormFile imageFile)
         {
             if (ModelState.IsValid)
             {
+                string wwwRootPath = _webHostEnvironment.WebRootPath;
+                if (imageFile != null && IsImageFile(imageFile.FileName))
+                {
+                    
+                    // Save the image to a folder or a storage service
+                    // In a real application, you would implement a service for handling file uploads
+                    string fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
+                    // For simplicity, this example saves the image to wwwroot/images folder
+                    var imagePath = Path.Combine(wwwRootPath, @"images");
+                    if(!string.IsNullOrEmpty(newPost.Post.ImageUrl))
+                    {
+                        //delete the old image
+                        var oldImagePath = Path.Combine(wwwRootPath, newPost.Post.ImageUrl.TrimStart('\\'));
+                        if (System.IO.File.Exists(oldImagePath))
+                        {
+                            System.IO.File.Delete(oldImagePath);
+                        }
+                    }
+
+                    using (var stream = new FileStream(Path.Combine(imagePath, fileName), FileMode.Create))
+                    {
+                        imageFile.CopyTo(stream);
+                    }
+
+                    // Set the ImageUrl property in the PostModel
+                    newPost.Post.ImageUrl = $"/images/{fileName}";
+                }
                 // Map PostModel to Post entity
                 var postEntity = new PostModel
                 {
                    
                     Title = newPost.Post.Title,
                     Body = newPost.Post.Body,
+                    ImageUrl = newPost.Post.ImageUrl,
                     CreatedAt = DateTime.Now,
                     UpdatedAt = DateTime.Now
                 };
+                try
+                {
+                    // Add the new post to the database
+                    _dbContext.PostModels.Add(postEntity);
+                    _dbContext.SaveChanges();
 
-                // Add the new post to the database
-                _dbContext.PostModels.Add(postEntity);
-                _dbContext.SaveChanges();
-
-                return RedirectToAction("Index");
+                    TempData["PostUpload"] = $"Post uploaded successfully ";
+                    TempData["ShowToastr"] = true;
+                    return RedirectToAction("Index");
+                }
+                catch
+                {
+                    TempData["error"] = "Invalid image format";
+                }
             }
 
             // If the model state is not valid, return to the insert view with validation errors
             return View(newPost);
+        }
+        [NonAction]
+        private bool IsImageFile(string fileName)
+        {
+            bool isValid = false;
+            string[] fileExtensions = { ".jpg", ".png", ".jpeg", ".JPG", ".PNG", ".JPEG" };
+
+            for (int i = 0; i < fileExtensions.Length; i++)
+            {
+                if (fileName.Contains(fileExtensions[i]))
+                {
+                    isValid = true;
+                }
+            }
+            return isValid;
         }
         public IActionResult Update(int id)
         {

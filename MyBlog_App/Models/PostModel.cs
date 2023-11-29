@@ -11,5 +11,7 @@ namespace MyBlog_App.Models
         public string Body { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
+        [ValidateNever]
+        public string ImageUrl { get; set; }
     }
 }

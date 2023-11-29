@@ -1,5 +1,5 @@
 ﻿@model PostViewModel
-<form asp-action="Insert" id="form-action" method="post" class="form-horizontal" role="form">
+<form asp-controller="Posts" asp-action="Insert" id="form-action" method="post" class="form-horizontal" enctype="multipart/form-data">
     <div asp-validation-summary="All" class="text-danger"></div>
    
         <div class="row justify-content-center">
@@ -14,7 +14,14 @@
         <div class="col-xl-6 col-lg-8 col-md-8 col-sm-10">
             <label asp-for="Post.Body" class="form-label"></label>
             <textarea asp-for="Post.Body" type="hidden" class="form-control" rows="5" cols="40"></textarea>
-            
+            <span asp-validation-for="Post.Body" class="text-danger"></span>
+        </div>
+    </div>
+        <div class="row justify-content-center">
+            <div class="col-xl-6 col-lg-8 col-md-8 col-sm-10">
+            <label asp-for="Post.ImageUrl"  class="form-label"></label>
+            <input type="file" name="imageFile" accept=".png, .jpg, .jpeg" asp-for="Post.ImageUrl" class="form-control" />
+            <span asp-validation-for="Post.ImageUrl" class="text-danger"></span>
         </div>
     </div>
     <div class="row justify-content-center">
