@@ -31,7 +31,9 @@ namespace MyBlog_App.Controllers
         }
         private PostViewModel GetAllPosts()
         {
-            var posts = _dbContext.PostModels.ToList(); // Assuming you have a DbSet<Post> in your AppDbContext
+            var posts = _dbContext.PostModels.Include(post => post.Comments)
+        .Include(post => post.Likes)
+        .ToList().ToList(); // Assuming you have a DbSet<Post> in your AppDbContext
 
             var postListViewModel = new PostViewModel
             {
@@ -42,7 +44,20 @@ namespace MyBlog_App.Controllers
                     Body = post.Body,
                     ImageUrl = post.ImageUrl,
                     CreatedAt = post.CreatedAt,
-                    UpdatedAt = post.UpdatedAt
+                    UpdatedAt = post.UpdatedAt,
+                    Comments = post.Comments.Select(comment => new CommentModel
+                    {
+                        Id = comment.Id,
+                        Text = comment.Text,
+                        CreatedAt = comment.CreatedAt,
+                        PostId = comment.PostId,
+                    }).ToList(),
+                    Likes = post.Likes.Select(like => new LikeModel
+                    {
+                        Id = like.Id,
+                        UserId = like.UserId,
+                        PostId = like.PostId,
+                    }).ToList()
                 }).ToList()
             };
 
@@ -106,6 +121,7 @@ namespace MyBlog_App.Controllers
         [HttpPost]
         public IActionResult Insert(PostViewModel newPost, IFormFile imageFile)
         {
+           
             if (ModelState.IsValid)
             {
                 string wwwRootPath = _webHostEnvironment.WebRootPath;
@@ -314,6 +330,43 @@ namespace MyBlog_App.Controllers
             return View(postViewModel);
         }
 
+        [HttpPost]
+        public IActionResult AddComment(int postId, string commentText)
+        {
+            try
+            {
+                // Find the post by postId
+                var post = _dbContext.PostModels.Include(p => p.Comments).FirstOrDefault(p => p.Id == postId);
 
+                if (post == null)
+                {
+                    // Handle the case where the post is not found
+                    return NotFound();
+                }
+
+                // Create a new comment
+                var newComment = new CommentModel
+                {
+                    Text = commentText,
+                    CreatedAt = DateTime.Now,
+                    // Other properties you may need
+                };
+
+                // Add the comment to the post
+                post.Comments.Add(newComment);
+
+                // Update the database
+                _dbContext.SaveChanges();
+
+                // Redirect back to the index page
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                // Log the exception or handle it as needed
+                return RedirectToAction("Index");
+            }
+        
     }
+}
 }

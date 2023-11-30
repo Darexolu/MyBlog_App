@@ -1,5 +1,5 @@
 ﻿@model PostViewModel
-  @*  <partial name="_Notifications" />  
+    <partial name="_Notifications" />  
  @if (TempData["ShowToastr"] != null && (bool)TempData["ShowToastr"])
 {
     <script>
@@ -8,46 +8,83 @@
             toastr.success('@TempData["PostUpload"]');
         });
     </script>
-}  *@
+}  
 @* 
 <div class="d-flex justify-content-end"><h4 class="text-light bg-success border-1 rounded-2">@TempData["PostDeleted"]</h4></div>
  *@<div class="text-center">
-    <h1 class="display-4">My latest Posts</h1>
+    <h1 class="display-4" style="font-family:  'sans-serif'; font:200;">My latest Posts</h1>
 </div>
 <div class="text-right">
-    <a asp-controller="Posts" asp-action="Insert">New Post</a>
+    <button style="background-color: rgb(10,101,102); border-radius: 30px; margin-left: 157px; margin-bottom: 20px;"> <a asp-controller="Posts" asp-action="Insert" style="text-decoration: none;
+color: white;">New Post</a></button>
 </div>
 <div class="row justify-content-center">
     <div class="col-xl-6 col-lg-8 col-md-8 col-sm-10">
-        <div class="posts-container">
+        <div class="posts-container" style="font-family: sans-serif;">
             @foreach(var p in Model.PostList)
             {
                 <div class="post">
-                    <h2><a asp-area="" asp-controller="Posts" asp-action="ViewPost" asp-route-id="@p.Id">@p.Title</a></h2>
+                    <h2 style="font-size: 25px;"><a asp-area="" asp-controller="Posts" asp-action="ViewPost" asp-route-id="@p.Id">@p.Title</a></h2>
                     <h5 class="text-muted">@p.UpdatedAt</h5>
-                    <p>ImageUrl: @p.ImageUrl</p>
 
                     @if (!string.IsNullOrEmpty(p.ImageUrl))
                     {
-                        <img src="~/images/@System.IO.Path.GetFileName(p.ImageUrl)" alt="Post Image" class="post-image" asp-append-version="true" />
+                        <img src="~/images/@System.IO.Path.GetFileName(p.ImageUrl)" alt="Post Image" width="300" class="post-image" asp-append-version="true" style="border-radius: 10px"/>
                     }
                     else
                     {
                         <p>No image available</p>
                     }
                      <div class="post-body">
-            @* <p class="summary">@Html.Raw(p.Body.Substring(0, Math.Min(p.Body.Length, 100)))</p>
+            <p class="summary">@Html.Raw(p.Body.Substring(0, Math.Min(p.Body.Length, 100)))</p>
             <p class="full-body" style="display: none;">@p.Body</p>
-            <a href="#" class="toggle-body">Read more</a> *@
-                        <p>@p.Body</p>
+                  <a href="#" class="toggle-body">Read more</a>
+                        <!-- Comment section -->
+                        <div class="comment-section">
+                            <h5>Comments</h5>
+                            @foreach (var comment in p.Comments)
+                            {
+                                <p>@comment.Text</p>
+                            }
+
+                            <!-- Comment form -->
+                            <form asp-controller="Posts" asp-action="AddComment" method="post">
+                                <input type="hidden" name="postId" value="@p.Id" />
+                                <label for="commentText">Add Comment:</label>
+                                <input type="text" name="commentText"  />
+                                <button type="submit">Comment</button>
+                            </form>
+                        </div>
+
+                        <!-- Like section -->
+                        <div class="like-section">
+                            <h5>Likes <span id="likeCount_@p.Id">0</span></h5>
+                            
+                            <button type="button" onclick="incrementLikes(@p.Id)">Like</button>
+                        </div>
+                   
+
+
+
+
+
+          
+
+
+                    
+
         </div>
+
+
+
+
                 </div>
             }
 
         </div>
     </div>
 </div>
-@* @section scripts {
+ @section scripts {
     <script>
         // JavaScript to toggle post body visibility
         $(document).ready(function () {
@@ -56,4 +93,11 @@
             });
         });
     </script>
-} *@
+    <script>
+        function incrementLikes(postId) {
+            var likeCountElement = document.getElementById("likeCount_" + postId);
+            var currentLikes = parseInt(likeCountElement.innerText);
+            likeCountElement.innerText = currentLikes + 1;
+        }
+    </script>
+} 

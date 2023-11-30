@@ -13,5 +13,7 @@ namespace MyBlog_App.Models
         public DateTime UpdatedAt { get; set; }
         [ValidateNever]
         public string ImageUrl { get; set; }
+        public List<CommentModel> Comments { get; set; }
+        public List<LikeModel> Likes { get; set; }
     }
 }
