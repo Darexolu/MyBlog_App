@@ -8,16 +8,19 @@
             toastr.success('@TempData["PostUpload"]');
         });
     </script>
-}  
+}
 @* 
 <div class="d-flex justify-content-end"><h4 class="text-light bg-success border-1 rounded-2">@TempData["PostDeleted"]</h4></div>
  *@<div class="text-center">
     <h1 class="display-4" style="font-family:  'sans-serif'; font:200;">My latest Posts</h1>
 </div>
-<div class="text-right">
-    <button style="background-color: rgb(10,101,102); border-radius: 30px; margin-left: 157px; margin-bottom: 20px;"> <a asp-controller="Posts" asp-action="Insert" style="text-decoration: none;
+@if (User.IsInRole("Admin"))
+{
+    <div class="text-right">
+        <button style="background-color: rgb(10,101,102); border-radius: 30px; margin-left: 157px; margin-bottom: 20px;"> <a asp-controller="Posts" asp-action="Insert" style="text-decoration: none;
 color: white;">New Post</a></button>
-</div>
+    </div>
+}
 <div class="row justify-content-center">
     <div class="col-xl-6 col-lg-8 col-md-8 col-sm-10">
         <div class="posts-container" style="font-family: sans-serif;">
