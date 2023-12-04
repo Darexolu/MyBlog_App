@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 
 namespace MyBlog_App.Models
 {
-    public class ApplicationUser:IdentityUser
+    public class ApplicationUser: IdentityUser
     {
-        public ApplicationUser()
-        {
-        }
+        //public ApplicationUser()
+        //{
+        //}
         //[Display(Name = "User name")]
         //public string userName { get; set; }
     }

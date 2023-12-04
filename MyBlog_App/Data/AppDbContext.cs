@@ -13,5 +13,18 @@ namespace MyBlog_App.Data
              
        }
         public DbSet<PostModel> PostModels { get; set; }
+        public DbSet<LikeModel> LikeModels { get; set; }
+        public DbSet<CommentModel> CommentModels { get; set; }
+        //protected override void OnModelCreating(ModelBuilder modelBuilder)
+        //{
+        //    // Add any additional configurations
+
+        //    // Define relationships
+        //    modelBuilder.Entity<LikeModel>()
+        //        .HasKey(like => new { like.UserId, like.PostId });
+
+        //    modelBuilder.Entity<CommentModel>()
+        //        .HasKey(comment => new { comment.Id });
+        //}
     }
 }

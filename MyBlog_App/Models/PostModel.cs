@@ -13,7 +13,10 @@ namespace MyBlog_App.Models
         public DateTime UpdatedAt { get; set; }
         [ValidateNever]
         public string ImageUrl { get; set; }
-        public List<CommentModel> Comments { get; set; }
-        public List<LikeModel> Likes { get; set; }
+        public int LikesCount { get; set; }
+        public bool IsLiked { get; set; }
+
+        public List<LikeModel> Likes { get; set; } = new List<LikeModel>();
+    public List<CommentModel> Comments { get; set; } = new List<CommentModel>();
     }
 }

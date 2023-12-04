@@ -7,6 +7,8 @@ using MyBlog_App.Models;
 using MyBlog_App.Models.ViewModels;
 using System.Diagnostics;
 using Microsoft.Extensions.Hosting.Internal;
+using Microsoft.AspNetCore.Identity;
+using MyBlog_App.Repository;
 
 namespace MyBlog_App.Controllers
 {
@@ -15,13 +17,17 @@ namespace MyBlog_App.Controllers
         private readonly ILogger<PostsController> _logger;
         private readonly AppDbContext _dbContext;
         private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IPostRepository _postRepository;
 
         public PostsController(ILogger<PostsController> logger, AppDbContext dbcontext,
-            IWebHostEnvironment webHostEnvironment)
+            IWebHostEnvironment webHostEnvironment, UserManager<ApplicationUser> userManager, IPostRepository postRepository)
         {
             _logger = logger;
             _dbContext = dbcontext;
             _webHostEnvironment = webHostEnvironment;
+            _userManager = userManager;
+            _postRepository = postRepository;
         }
 
         public IActionResult Index()
@@ -121,19 +127,19 @@ namespace MyBlog_App.Controllers
         [HttpPost]
         public IActionResult Insert(PostViewModel newPost, IFormFile imageFile)
         {
-           
+
             if (ModelState.IsValid)
             {
                 string wwwRootPath = _webHostEnvironment.WebRootPath;
                 if (imageFile != null && IsImageFile(imageFile.FileName))
                 {
-                    
+
                     // Save the image to a folder or a storage service
                     // In a real application, you would implement a service for handling file uploads
                     string fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
                     // For simplicity, this example saves the image to wwwroot/images folder
                     var imagePath = Path.Combine(wwwRootPath, @"images");
-                    if(!string.IsNullOrEmpty(newPost.Post.ImageUrl))
+                    if (!string.IsNullOrEmpty(newPost.Post.ImageUrl))
                     {
                         //delete the old image
                         var oldImagePath = Path.Combine(wwwRootPath, newPost.Post.ImageUrl.TrimStart('\\'));
@@ -154,7 +160,7 @@ namespace MyBlog_App.Controllers
                 // Map PostModel to Post entity
                 var postEntity = new PostModel
                 {
-                   
+
                     Title = newPost.Post.Title,
                     Body = newPost.Post.Body,
                     ImageUrl = newPost.Post.ImageUrl,
@@ -252,7 +258,7 @@ namespace MyBlog_App.Controllers
             // If the model state is not valid, return to the update view with validation errors
             return View(postViewModel);
         }
-       
+
         public IActionResult DeletePost(int id)
         {
             var post = GetPostById(id);
@@ -300,18 +306,18 @@ namespace MyBlog_App.Controllers
                 return NotFound();
             }
 
-           
-                _dbContext.PostModels.Remove(post);
-                _dbContext.SaveChanges();
+
+            _dbContext.PostModels.Remove(post);
+            _dbContext.SaveChanges();
             TempData["PostDeleted"] = $"The post with title \"{post.Title}\" has been successfully deleted.";
 
             // Use Toastr to display notification
             TempData["ShowToastr"] = true;
-           
+
             return RedirectToAction("index");
-           
+
         }
-      
+
         public IActionResult DeleteConfirmation(int id)
         {
             var post = GetPostById(id);
@@ -366,7 +372,54 @@ namespace MyBlog_App.Controllers
                 // Log the exception or handle it as needed
                 return RedirectToAction("Index");
             }
-        
+
+        }
+        //
+        [HttpPost]
+        public IActionResult Comment(int postId, string commentText)
+        {
+            // Get the current user
+            var currentUser = _userManager.GetUserAsync(User).Result;
+            if (currentUser == null)
+            {
+                // User is not authenticated, handle accordingly (redirect to login, etc.)
+                return RedirectToAction("Login", "Account");
+            }
+
+            // Add a new comment to the post
+            var newComment = new CommentModel
+            {
+                UserId = currentUser.Id,
+                PostId = postId,
+                Text = commentText
+                // You can include additional properties, e.g., timestamp
+            };
+
+            _dbContext.CommentModels.Add(newComment);
+            _dbContext.SaveChanges();
+
+            // Redirect back to the post or the index page
+            return RedirectToAction("Index");
+        }
+        [HttpPost]
+        public IActionResult Like(int postId)
+        {
+            var updatedLikesCount = _postRepository.AddLike(postId, GetCurrentUserId());
+            return Json(new { success = true, likesCount = updatedLikesCount });
+        }
+
+        [HttpPost]
+        public JsonResult Unlike(int postId)
+        {
+            var updatedLikesCount = _postRepository.RemoveLike(postId, GetCurrentUserId());
+            return Json(new { success = true, likesCount = updatedLikesCount });
+        }
+        private string GetCurrentUserId()
+        {
+            return _userManager.GetUserId(User);
+        }
     }
-}
-}
+    }
+
+
+
