@@ -51,6 +51,7 @@ namespace MyBlog_App.Controllers
                     ImageUrl = post.ImageUrl,
                     CreatedAt = post.CreatedAt,
                     UpdatedAt = post.UpdatedAt,
+                    LikesCount = post.LikesCount,
                     Comments = post.Comments.Select(comment => new CommentModel
                     {
                         Id = comment.Id,
@@ -402,17 +403,17 @@ namespace MyBlog_App.Controllers
             return RedirectToAction("Index");
         }
         [HttpPost]
-        public IActionResult Like(int postId)
+        public JsonResult Like(int postId)
         {
             var updatedLikesCount = _postRepository.AddLike(postId, GetCurrentUserId());
-            return Json(new { success = true, likesCount = updatedLikesCount });
+            return Json(new { success = true, LikesCount = updatedLikesCount, isLiked = true });
         }
 
         [HttpPost]
         public JsonResult Unlike(int postId)
         {
             var updatedLikesCount = _postRepository.RemoveLike(postId, GetCurrentUserId());
-            return Json(new { success = true, likesCount = updatedLikesCount });
+            return Json(new { success = true, likesCount = updatedLikesCount, isLiked = false });
         }
         private string GetCurrentUserId()
         {
