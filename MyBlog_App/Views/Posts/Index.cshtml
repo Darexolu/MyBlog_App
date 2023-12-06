@@ -120,16 +120,16 @@ color: white;">New Post</a></button>
                 data: { postId: postId },
                 success: function (data) {
                     var likesCountElement = likeButton.closest('.like-section').find('.likes-count');
-                    likesCountElement.text(data.LikesCount);
+                    likesCountElement.text(data.likesCount);
 
                     if (data.isLiked) {
                         likeButton.addClass('liked');
                         likeButton.text('Unlike');
-                      
+                        likesCountElement.text(data.likesCount);
                     } else {
                         likeButton.removeClass('liked');
                         likeButton.text('Like');
-                        
+                        likesCountElement.text(data.likesCount);
                     }
                      likeButton.data('is-liked', !isLiked);
                 },

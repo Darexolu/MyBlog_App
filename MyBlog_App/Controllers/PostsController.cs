@@ -430,11 +430,11 @@ namespace MyBlog_App.Controllers
                 _postRepository.AddLike(postId, userId);
                 post.LikesCount++;
                 _dbContext.SaveChanges(); // Save changes to the database
-                return Json(new { success = true, LikesCount = post.LikesCount, isLiked = true, message = "Post liked successfully" });
+                return Json(new { success = true, likesCount = post.LikesCount, isLiked = true, message = "Post liked successfully" });
 
             }
 
-            return Json(new { success = true, LikesCount = post.LikesCount, message = "Post already liked", isLiked = true });
+            return Json(new { success = true, likesCount = post.LikesCount, message = "Post already liked", isLiked = true });
         }
 
         [HttpPost]
@@ -450,9 +450,9 @@ namespace MyBlog_App.Controllers
                 _postRepository.RemoveLike(postId, userId);
                 post.LikesCount--;
                 _dbContext.SaveChanges();  // Save changes to the database
-                return Json(new { success = true, LikesCount = post.LikesCount, isLiked = false, message = "Post unliked successfully" });
+                return Json(new { success = true, likesCount = post.LikesCount, isLiked = false, message = "Post unliked successfully" });
             }
-            return Json(new { success = true, LikesCount = post.LikesCount, message = "Post already unliked", isLiked = false });
+            return Json(new { success = true, likesCount = post.LikesCount, message = "Post already unliked", isLiked = false });
 
 
         }
