@@ -1,4 +1,5 @@
-﻿using MyBlog_App.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using MyBlog_App.Data;
 using MyBlog_App.Models;
 
 namespace MyBlog_App.Repository
@@ -52,10 +53,17 @@ namespace MyBlog_App.Repository
         {
             return _dbContext.LikeModels.Count(l => l.PostId == postId);
         }
-    
 
-    // Other methods for interacting with the post data
+        public PostModel GetPostById(int postId)
+        {
+            return _dbContext.PostModels.FirstOrDefault(p => p.Id == postId);
+        }
+        // Other methods for interacting with the post data
+        public bool HasUserLikedPost(int postId, string userId)
+        {
+            // Check if there is a like record for the specified post and user
+            return _dbContext.LikeModels.Any(like => like.PostId == postId && like.UserId == userId);
+        }
 
-   
-}
+    }
 }

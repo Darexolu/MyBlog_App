@@ -61,7 +61,7 @@ color: white;">New Post</a></button>
 
                         <!-- Like section -->
                         <div class="like-section">
-                            <h5>Likes <span class="likes-count" data-post-id="@p.Id">@p.LikesCount</span></h5>
+                            <h5>Likes <span class="likes-count" >@p.LikesCount</span></h5>
 
                             <button type="button"  onclick="incrementLikes(@p.Id)"  data-post-id="@p.Id"
                             data-like-url="@Url.Action("Like", new { postId = p.Id })"
@@ -100,13 +100,13 @@ color: white;">New Post</a></button>
         });
    
 </script>
-   // <script>
+   @* // <script>
     //     function incrementLikes(postId) {
     //         var likeCountElement = document.getElementById("likeCount_" + postId);
     //         var currentLikes = parseInt(likeCountElement.innerText);
     //         likeCountElement.innerText = currentLikes + 1;
     //     }
-    // </script> 
+    // </script>  *@
    <script>
         function incrementLikes(postId) {
             var likeButton = $(`[data-post-id="${postId}"]`);
@@ -119,18 +119,17 @@ color: white;">New Post</a></button>
                 url: isLiked ? '/Posts/Unlike': '/Posts/Like',
                 data: { postId: postId },
                 success: function (data) {
-                    var likesCountElement = likeButton.find('.likes-count');
-                    likesCountElement.text(data.LikesCount); // Update the likes count
-                    var currentLikes = parseInt(likesCountElement.text());
+                    var likesCountElement = likeButton.closest('.like-section').find('.likes-count');
+                    likesCountElement.text(data.LikesCount);
 
                     if (data.isLiked) {
                         likeButton.addClass('liked');
                         likeButton.text('Unlike');
-                        likesCountElement.text(data.LikesCount);
+                      
                     } else {
                         likeButton.removeClass('liked');
                         likeButton.text('Like');
-                        likesCountElement.text(data.LikesCount);
+                        
                     }
                      likeButton.data('is-liked', !isLiked);
                 },

@@ -402,18 +402,59 @@ namespace MyBlog_App.Controllers
             // Redirect back to the post or the index page
             return RedirectToAction("Index");
         }
+        //[HttpPost]
+        //public JsonResult Like(int postId)
+        //{
+        //    var updatedLikesCount = _postRepository.AddLike(postId, GetCurrentUserId());
+
+
+        //    return Json(new { success = true, LikesCount = updatedLikesCount, isLiked = true });
+        //}
+
+        //[HttpPost]
+        //public JsonResult Unlike(int postId)
+        //{
+        //    var updatedLikesCount = _postRepository.RemoveLike(postId, GetCurrentUserId());
+        //    return Json(new { success = true, likesCount = updatedLikesCount, isLiked = false });
+        //}
         [HttpPost]
         public JsonResult Like(int postId)
         {
-            var updatedLikesCount = _postRepository.AddLike(postId, GetCurrentUserId());
-            return Json(new { success = true, LikesCount = updatedLikesCount, isLiked = true });
+            var userId = GetCurrentUserId();
+            var post = _postRepository.GetPostById(postId);
+
+            // Check if the user has already liked the post
+            if (!_postRepository.HasUserLikedPost(postId, userId))
+            {
+                // If not, add the like and update LikesCount
+                _postRepository.AddLike(postId, userId);
+                post.LikesCount++;
+                _dbContext.SaveChanges(); // Save changes to the database
+                return Json(new { success = true, LikesCount = post.LikesCount, isLiked = true, message = "Post liked successfully" });
+
+            }
+
+            return Json(new { success = true, LikesCount = post.LikesCount, message = "Post already liked", isLiked = true });
         }
 
         [HttpPost]
         public JsonResult Unlike(int postId)
         {
-            var updatedLikesCount = _postRepository.RemoveLike(postId, GetCurrentUserId());
-            return Json(new { success = true, likesCount = updatedLikesCount, isLiked = false });
+            var userId = GetCurrentUserId();
+            var post = _postRepository.GetPostById(postId);
+
+            // Check if the user has liked the post
+            if (_postRepository.HasUserLikedPost(postId, userId))
+            {
+                // If yes, remove the like and update LikesCount
+                _postRepository.RemoveLike(postId, userId);
+                post.LikesCount--;
+                _dbContext.SaveChanges();  // Save changes to the database
+                return Json(new { success = true, LikesCount = post.LikesCount, isLiked = false, message = "Post unliked successfully" });
+            }
+            return Json(new { success = true, LikesCount = post.LikesCount, message = "Post already unliked", isLiked = false });
+
+
         }
         private string GetCurrentUserId()
         {
