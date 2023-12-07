@@ -456,7 +456,7 @@ namespace MyBlog_App.Controllers
             {
                 // If yes, remove the like and update LikesCount
                 _postRepository.RemoveLike(postId, userId);
-                post.IsLiked = true;
+                post.IsLiked = false;
                 post.LikesCount--;
                 _dbContext.SaveChanges();  // Save changes to the database
                 return Json(new { success = true, likesCount = post.LikesCount, isLiked = post.IsLiked, message = "Post unliked successfully" });
