@@ -52,6 +52,7 @@ namespace MyBlog_App.Controllers
                     CreatedAt = post.CreatedAt,
                     UpdatedAt = post.UpdatedAt,
                     LikesCount = post.LikesCount,
+                    IsLiked = post.IsLiked,
                     Comments = post.Comments.Select(comment => new CommentModel
                     {
                         Id = comment.Id,
@@ -434,13 +435,14 @@ namespace MyBlog_App.Controllers
             {
                 // If not, add the like and update LikesCount
                 _postRepository.AddLike(postId, userId);
+                post.IsLiked = true;
                 post.LikesCount++;
                 _dbContext.SaveChanges(); // Save changes to the database
-                return Json(new { success = true, likesCount = post.LikesCount, isLiked = true, message = "Post liked successfully" });
+                return Json(new { success = true, likesCount = post.LikesCount, isLiked = post.IsLiked, message = "Post liked successfully" });
 
             }
 
-            return Json(new { success = true, likesCount = post.LikesCount, message = "Post already liked", isLiked = true });
+            return Json(new { success = true, likesCount = post.LikesCount, message = "Post already liked", isLiked = post.IsLiked });
         }
 
         [HttpPost]
@@ -454,11 +456,12 @@ namespace MyBlog_App.Controllers
             {
                 // If yes, remove the like and update LikesCount
                 _postRepository.RemoveLike(postId, userId);
+                post.IsLiked = true;
                 post.LikesCount--;
                 _dbContext.SaveChanges();  // Save changes to the database
-                return Json(new { success = true, likesCount = post.LikesCount, isLiked = false, message = "Post unliked successfully" });
+                return Json(new { success = true, likesCount = post.LikesCount, isLiked = post.IsLiked, message = "Post unliked successfully" });
             }
-            return Json(new { success = true, likesCount = post.LikesCount, message = "Post already unliked", isLiked = false });
+            return Json(new { success = true, likesCount = post.LikesCount, message = "Post already unliked", isLiked = post.IsLiked });
 
 
         }
