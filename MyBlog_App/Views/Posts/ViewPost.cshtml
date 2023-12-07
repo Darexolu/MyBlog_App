@@ -6,8 +6,9 @@
     <p>@Model.Post.Body</p>
 </div>
 <div class="post-actions">
-    <ul>
+    <ul>@if (User.IsInRole("Admin"))
+{
         <li><a class="btn btn-primary" asp-area="" asp-controller="Posts" asp-action="EditPost" asp-route-id="@Model.Post.Id">Update</a></li>
         <li><a class="btn btn-danger" asp-controller="Posts" asp-action="DeletePost" asp-route-id="@Model.Post.Id">Delete</a></li>
-    </ul>
+} </ul>
 </div>

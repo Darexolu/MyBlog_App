@@ -7,5 +7,6 @@
         public DateTime CreatedAt { get; set; }
         public int PostId { get; set; } // Foreign key to associate the comment with a post
         public string UserId { get; set; }
+        public string UserName { get; set; } 
     }
 }

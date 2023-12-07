@@ -55,6 +55,7 @@ namespace MyBlog_App.Controllers
                     Comments = post.Comments.Select(comment => new CommentModel
                     {
                         Id = comment.Id,
+                        UserName = comment.UserName,
                         Text = comment.Text,
                         CreatedAt = comment.CreatedAt,
                         PostId = comment.PostId,
@@ -342,6 +343,8 @@ namespace MyBlog_App.Controllers
         {
             try
             {
+                var userId = GetCurrentUserId();
+                var username = GetUsernameById(userId);
                 // Find the post by postId
                 var post = _dbContext.PostModels.Include(p => p.Comments).FirstOrDefault(p => p.Id == postId);
 
@@ -354,8 +357,11 @@ namespace MyBlog_App.Controllers
                 // Create a new comment
                 var newComment = new CommentModel
                 {
+                    PostId = postId,
                     Text = commentText,
+                    UserName = username,
                     CreatedAt = DateTime.Now,
+                   UserId = userId
                     // Other properties you may need
                 };
 
@@ -402,21 +408,21 @@ namespace MyBlog_App.Controllers
             // Redirect back to the post or the index page
             return RedirectToAction("Index");
         }
-        //[HttpPost]
-        //public JsonResult Like(int postId)
-        //{
-        //    var updatedLikesCount = _postRepository.AddLike(postId, GetCurrentUserId());
+        public string GetUsernameById(string userId)
+        {
+            // Assuming you have UserManager injected into your service or controller
+            var user = _userManager.FindByIdAsync(userId).Result; // You should use async/await in a real application
 
+            // Check if the user exists
+            if (user != null)
+            {
+                return user.UserName; // 'UserName' is the property in Identity representing the username
+            }
 
-        //    return Json(new { success = true, LikesCount = updatedLikesCount, isLiked = true });
-        //}
+            // Return a default username or handle the case when the user is not found
+            return "Unknown User";
+        }
 
-        //[HttpPost]
-        //public JsonResult Unlike(int postId)
-        //{
-        //    var updatedLikesCount = _postRepository.RemoveLike(postId, GetCurrentUserId());
-        //    return Json(new { success = true, likesCount = updatedLikesCount, isLiked = false });
-        //}
         [HttpPost]
         public JsonResult Like(int postId)
         {
@@ -459,6 +465,15 @@ namespace MyBlog_App.Controllers
         private string GetCurrentUserId()
         {
             return _userManager.GetUserId(User);
+        }
+        [HttpGet]
+        public JsonResult GetLikeState(int postId)
+        {
+            var userId = GetCurrentUserId();
+            var isLiked = _postRepository.HasUserLikedPost(postId, userId);
+            var likesCount = _postRepository.GetPostLikesCount(postId);
+
+            return Json(new { isLiked, likesCount });
         }
     }
     }

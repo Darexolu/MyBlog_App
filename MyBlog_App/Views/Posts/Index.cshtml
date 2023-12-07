@@ -47,7 +47,7 @@ color: white;">New Post</a></button>
                             <h5>Comments</h5>
                             @foreach (var comment in p.Comments)
                             {
-                                <p>@comment.Text</p>
+                                <p><strong style="color: green;">@comment.UserName:</strong> @comment.Text</p>
                             }
 
                             <!-- Comment form -->

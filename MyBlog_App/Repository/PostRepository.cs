@@ -64,6 +64,29 @@ namespace MyBlog_App.Repository
             // Check if there is a like record for the specified post and user
             return _dbContext.LikeModels.Any(like => like.PostId == postId && like.UserId == userId);
         }
+        public int GetPostLikesCount(int postId)
+        {
+            var post = _dbContext.PostModels.Find(postId);
 
+            // Assuming that LikesCount is a property in PostModel
+            return post?.LikesCount ?? 0;
+        }
+
+        public void UpdateLikeState(int postId, string userId, bool isLiked)
+        {
+            var existingLike = _dbContext.LikeModels
+                .FirstOrDefault(l => l.PostId == postId && l.UserId == userId);
+
+            if (existingLike != null)
+            {
+                existingLike.IsLiked = isLiked;
+                _dbContext.SaveChanges();
+            }
+            else
+            {
+                // Handle the case where the like doesn't exist, if needed
+                // This could happen if the like state was not properly initialized before
+            }
+        }
     }
 }
