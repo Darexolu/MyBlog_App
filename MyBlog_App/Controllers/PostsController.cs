@@ -9,6 +9,7 @@ using System.Diagnostics;
 using Microsoft.Extensions.Hosting.Internal;
 using Microsoft.AspNetCore.Identity;
 using MyBlog_App.Repository;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MyBlog_App.Controllers
 {
@@ -83,10 +84,12 @@ namespace MyBlog_App.Controllers
         }
         public IActionResult ViewPost(int id)
         {
-            var post = GetPostById(id);
-            var postViewModel = new PostViewModel();
-            postViewModel.Post = post;
-            return View(postViewModel);
+            //var post = GetPostById(id);
+            //var postViewModel = new PostViewModel();
+            //postViewModel.Post = post;
+            //return View(postViewModel);
+            var postListViewModel = GetAllPosts();
+            return View(postListViewModel);
         }
         public IActionResult EditPost(int id)
         {
@@ -340,6 +343,7 @@ namespace MyBlog_App.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "User",AuthenticationSchemes = "LoginAuthentication")]
         public IActionResult AddComment(int postId, string commentText)
         {
             try
@@ -373,9 +377,9 @@ namespace MyBlog_App.Controllers
                 _dbContext.SaveChanges();
 
                 // Redirect back to the index page
-                return RedirectToAction("Index");
+                return RedirectToAction("ViewPost");
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 // Log the exception or handle it as needed
                 return RedirectToAction("Index");

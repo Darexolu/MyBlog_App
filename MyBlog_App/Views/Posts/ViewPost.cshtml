@@ -1,9 +1,69 @@
 ﻿@model PostViewModel
 <div class="post">
-    <h2>@Model.Post.Title</h2>
-    <h5>Created At: @Model.Post.CreatedAt</h5>
-    <h5>Last Modified At: @Model.Post.UpdatedAt</h5>
-    <p>@Model.Post.Body</p>
+     @foreach(var p in Model.PostList)
+            {
+        <h2 style="font-size: 25px;"><a asp-area="" asp-controller="Posts" asp-action="ViewPost" asp-route-id="@p.Id">@p.Title</a></h2>
+
+    <h5 style="font-size: 12px">Created At: @p.CreatedAt</h5>
+        <h5 style="font-size: 12px">Last Modified At: @p.UpdatedAt</h5>
+
+        @if (!string.IsNullOrEmpty(p.ImageUrl))
+        {
+            <img src="~/images/@System.IO.Path.GetFileName(p.ImageUrl)" alt="Post Image" width="300" class="post-image" asp-append-version="true" style="border-radius: 10px" />
+        }
+        else
+        {
+            <p>No image available</p>
+        }
+    <div class="post-body">
+        <p class="summary">@Html.Raw(p.Body.Substring(0, Math.Min(p.Body.Length, 100)))</p>
+        <p class="full-body" style="display: none;">@p.Body</p>
+       
+            <a href="#" class="toggle-body">Read more</a>
+            <!-- Like section -->
+            <div class="like-section" style="margin-bottom: 10px;">
+                <h5>Likes <span class="likes-count">@p.LikesCount</span></h5>
+                @if (User.IsInRole("User"))
+                {
+                    <button type="button" onclick="incrementLikes(@p.Id)" data-post-id="@p.Id"
+                            data-like-url="@Url.Action("Like", new { postId = p.Id })"
+                            data-unlike-url="@Url.Action("Unlike", new { postId = p.Id })"
+                            data-is-liked="@p.IsLiked">
+                        @if (p.IsLiked)
+                        {
+                            <text>Unlike</text>
+                        }
+                        else
+                        {
+                            <text>Like</text>
+                        }
+                    </button>
+                }
+            </div>
+        <!-- Comment section -->
+        <div class="comment-section">
+            <h5>Comments</h5>
+            @foreach (var comment in p.Comments)
+            {
+                <p><strong style="color: green;">@comment.UserName:</strong> @comment.Text</p>
+            }
+
+            <!-- Comment form -->
+            <form asp-controller="Posts" asp-action="AddComment" method="post">
+                <input type="hidden" name="postId" value="@p.Id" />
+                <label for="commentText">Add Comment:</label>
+                <input type="text" name="commentText" />
+                <button type="submit">Comment</button>
+            </form>
+        </div>
+
+      
+        
+
+
+    </div>
+
+}
 </div>
 <div class="post-actions">
     <ul>@if (User.IsInRole("Admin"))

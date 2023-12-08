@@ -29,7 +29,7 @@ color: white;">New Post</a></button>
                 <div class="post">
                     <h2 style="font-size: 25px;"><a asp-area="" asp-controller="Posts" asp-action="ViewPost" asp-route-id="@p.Id">@p.Title</a></h2>
                     <h5 class="text-muted">@p.UpdatedAt</h5>
-
+@* 
                     @if (!string.IsNullOrEmpty(p.ImageUrl))
                     {
                         <img src="~/images/@System.IO.Path.GetFileName(p.ImageUrl)" alt="Post Image" width="300" class="post-image" asp-append-version="true" style="border-radius: 10px"/>
@@ -37,8 +37,8 @@ color: white;">New Post</a></button>
                     else
                     {
                         <p>No image available</p>
-                    }
-                     <div class="post-body">
+                    } *@
+                  @*    <div class="post-body">
             <p class="summary">@Html.Raw(p.Body.Substring(0, Math.Min(p.Body.Length, 100)))</p>
             <p class="full-body" style="display: none;">@p.Body</p>
                   <a href="#" class="toggle-body">Read more</a>
@@ -83,67 +83,11 @@ color: white;">New Post</a></button>
 
 
 
-
+ *@
                 </div>
             }
 
         </div>
     </div>
 </div>
- @section scripts {
-    <script>
-        // JavaScript to toggle post body visibility
-        $(document).ready(function () {
-            $(".toggle-body").click(function () {
-                $(this).prev(".full-body").toggle();
-            });
-        });
-   
-</script>
-   @* // <script>
-    //     function incrementLikes(postId) {
-    //         var likeCountElement = document.getElementById("likeCount_" + postId);
-    //         var currentLikes = parseInt(likeCountElement.innerText);
-    //         likeCountElement.innerText = currentLikes + 1;
-    //     }
-    // </script>  *@
-   <script>
-        function incrementLikes(postId) {
-            var likeButton = $(`[data-post-id="${postId}"]`);
-            var likeUrl = likeButton.data('like-url');
-            var unlikeUrl = likeButton.data('unlike-url');
-            var isLiked = likeButton.data('is-liked');
-
-            $.ajax({
-                type: 'POST',
-                url: isLiked ? '/Posts/Unlike': '/Posts/Like',
-                data: { postId: postId },
-                success: function (data) {
-                    var likesCountElement = likeButton.closest('.like-section').find('.likes-count');
-                    likesCountElement.text(data.likesCount);
-
-                    if (data.isLiked) {
-                        likeButton.addClass('liked');
-                        likeButton.text('Unlike');
-                        likesCountElement.text(data.likesCount);
-                    } else {
-                        likeButton.removeClass('liked');
-                        likeButton.text('Like');
-                        likesCountElement.text(data.likesCount);
-                    }
-                     likeButton.data('is-liked', !isLiked);
-                },
-                error: function () {
-                    console.error('Error in like/unlike operation');
-                }
-            });
-        }
-
-        $(document).ready(function () {
-            $('.like-button').on('click', function () {
-                var postId = $(this).data('post-id');
-                incrementLikes(postId);
-            });
-        });
-    </script>
-} 
+ 
