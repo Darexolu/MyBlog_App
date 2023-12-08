@@ -1,56 +1,56 @@
 ﻿@model PostViewModel
 <div class="post">
-     @foreach(var p in Model.PostList)
-            {
-        <h2 style="font-size: 25px;"><a asp-area="" asp-controller="Posts" asp-action="ViewPost" asp-route-id="@p.Id">@p.Title</a></h2>
 
-    <h5 style="font-size: 12px">Created At: @p.CreatedAt</h5>
-        <h5 style="font-size: 12px">Last Modified At: @p.UpdatedAt</h5>
 
-        @if (!string.IsNullOrEmpty(p.ImageUrl))
+    <h2 style="font-size: 25px;"><a asp-area="" asp-controller="Posts" asp-action="ViewPost" asp-route-id="@Model.Post.Id">@Model.Post.Title</a></h2>
+
+    <h5 style="font-size: 12px">Created At: @Model.Post.CreatedAt</h5>
+    <h5 style="font-size: 12px">Last Modified At: @Model.Post.UpdatedAt</h5>
+
+    @if (!string.IsNullOrEmpty(@Model.Post.ImageUrl))
         {
-            <img src="~/images/@System.IO.Path.GetFileName(p.ImageUrl)" alt="Post Image" width="300" class="post-image" asp-append-version="true" style="border-radius: 10px" />
+        <img src="~/images/@System.IO.Path.GetFileName(@Model.Post.ImageUrl)" alt="Post Image" width="300" class="post-image" asp-append-version="true" style="border-radius: 10px" />
         }
         else
         {
             <p>No image available</p>
         }
     <div class="post-body">
-        <p class="summary">@Html.Raw(p.Body.Substring(0, Math.Min(p.Body.Length, 100)))</p>
-        <p class="full-body" style="display: none;">@p.Body</p>
+        <p class="summary">@Html.Raw( @Model.Post.Body.Substring(0, Math.Min( @Model.Post.Body.Length, 100)))</p>
+        <p class="full-body" style="display: none;"> @Model.Post.Body</p>
        
             <a href="#" class="toggle-body">Read more</a>
             <!-- Like section -->
             <div class="like-section" style="margin-bottom: 10px;">
-                <h5>Likes <span class="likes-count">@p.LikesCount</span></h5>
+            <h5>Likes <span class="likes-count"> @Model.Post.LikesCount</span></h5>
                 @if (User.IsInRole("User"))
-                {
-                    <button type="button" onclick="incrementLikes(@p.Id)" data-post-id="@p.Id"
-                            data-like-url="@Url.Action("Like", new { postId = p.Id })"
-                            data-unlike-url="@Url.Action("Unlike", new { postId = p.Id })"
-                            data-is-liked="@p.IsLiked">
-                        @if (p.IsLiked)
-                        {
-                            <text>Unlike</text>
-                        }
-                        else
-                        {
-                            <text>Like</text>
-                        }
-                    </button>
-                }
-            </div>
+            {
+                <button type="button" onclick="incrementLikes( @Model.Post.Id)" data-post-id="@Model.Post.Id"
+                data-like-url="@Url.Action("Like", new { postId =  @Model.Post.Id })"
+                data-unlike-url="@Url.Action("Unlike", new { postId =  @Model.Post.Id })"
+                data-is-liked="@Model.Post.IsLiked">
+                    @if (@Model.Post.IsLiked)
+                    {
+                        <text>Unlike</text>
+                    }
+                    else
+                    {
+                        <text>Like</text>
+                    }
+                </button>
+            }
+        </div>
         <!-- Comment section -->
         <div class="comment-section">
             <h5>Comments</h5>
-            @foreach (var comment in p.Comments)
+                    @foreach (var comment in @Model.Post.Comments)
             {
                 <p><strong style="color: green;">@comment.UserName:</strong> @comment.Text</p>
             }
 
             <!-- Comment form -->
             <form asp-controller="Posts" asp-action="AddComment" method="post">
-                <input type="hidden" name="postId" value="@p.Id" />
+                    <input type="hidden" name="postId" value=" @Model.Post.Id" />
                 <label for="commentText">Add Comment:</label>
                 <input type="text" name="commentText" />
                 <button type="submit">Comment</button>
@@ -63,7 +63,7 @@
 
     </div>
 
-}
+
 </div>
 <div class="post-actions">
     <ul>@if (User.IsInRole("Admin"))

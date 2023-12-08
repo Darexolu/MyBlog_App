@@ -84,13 +84,64 @@ namespace MyBlog_App.Controllers
         }
         public IActionResult ViewPost(int id)
         {
-            //var post = GetPostById(id);
-            //var postViewModel = new PostViewModel();
-            //postViewModel.Post = post;
-            //return View(postViewModel);
-            var postListViewModel = GetAllPosts();
-            return View(postListViewModel);
+
+            var viewModel = GetPostWithComments(id);
+
+            if (viewModel == null)
+            {
+                // Handle the case where the post with the specified ID is not found
+                return NotFound();
+            }
+
+            // Pass the view model to the view
+            return View(viewModel);
         }
+        private PostViewModel GetPostWithComments(int postId)
+        {
+            var post = _dbContext.PostModels
+                .Include(p => p.Comments)
+                .Include(p => p.Likes)
+                .FirstOrDefault(p => p.Id == postId);
+
+            if (post == null)
+            {
+                // Handle the case where the post with the specified ID is not found
+                return null;
+            }
+
+            var postViewModel = new PostViewModel
+            {
+                Post = new PostModel
+                {
+                    Id = post.Id,
+                    Title = post.Title,
+                    Body = post.Body,
+                    ImageUrl = post.ImageUrl,
+                    CreatedAt = post.CreatedAt,
+                    UpdatedAt = post.UpdatedAt,
+                    LikesCount = post.LikesCount,
+                    IsLiked = post.IsLiked,
+                    Comments = post.Comments.Select(comment => new CommentModel
+                    {
+                        Id = comment.Id,
+                        UserName = comment.UserName,
+                        Text = comment.Text,
+                        CreatedAt = comment.CreatedAt,
+                        PostId = comment.PostId,
+                    }).ToList(),
+                    Likes = post.Likes.Select(like => new LikeModel
+                    {
+                        Id = like.Id,
+                        UserId = like.UserId,
+                        PostId = like.PostId,
+                    }).ToList()
+                }
+            };
+
+            return postViewModel;
+        }
+
+
         public IActionResult EditPost(int id)
         {
             var post = GetPostById(id);
@@ -343,7 +394,7 @@ namespace MyBlog_App.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "User",AuthenticationSchemes = "LoginAuthentication")]
+        [Authorize(Roles = "User")]
         public IActionResult AddComment(int postId, string commentText)
         {
             try
@@ -377,7 +428,7 @@ namespace MyBlog_App.Controllers
                 _dbContext.SaveChanges();
 
                 // Redirect back to the index page
-                return RedirectToAction("ViewPost");
+                return RedirectToAction("ViewPost", new { id = postId });
             }
             catch (Exception )
             {
