@@ -47,4 +47,7 @@
                 incrementLikes(postId);
             });
         });
-   
+function showReplyForm(commentId) {
+    var form = $(`#replyForm_${commentId}`);
+    form.toggle();
+}

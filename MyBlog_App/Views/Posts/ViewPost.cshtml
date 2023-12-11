@@ -45,7 +45,37 @@
             <h5>Comments</h5>
                     @foreach (var comment in @Model.Post.Comments)
             {
-                <p><strong style="color: green;">@comment.UserName:</strong> @comment.Text</p>
+                <div style="margin-left: @(comment.Depth * 20)px">
+                    <p>
+                        <strong style="color: green;">@comment.UserName:</strong> @comment.Text
+                        @if (!string.IsNullOrEmpty(comment.ReplyToUserName))
+                        {
+                            <span style="color: blue;">In reply to @comment.ReplyToUserName: @comment.ReplyToCommentText</span>
+                        }
+                    </p>
+                    <button onclick="showReplyForm(@comment.Id)">Reply</button>
+
+                    @foreach (var reply in Model.Post.Comments.Where(c => c.ParentCommentId == comment.Id))
+                    {
+                        <div style="margin-left: @(reply.Depth * 20)px">
+                            <p>
+                                @reply.UserName: @reply.Text
+                                @if (!string.IsNullOrEmpty(reply.ReplyToUserName))
+                                {
+                                    <span style="color: blue;">In reply to @reply.ReplyToUserName: @reply.ReplyToCommentText</span>
+                                }
+                            </p>
+                        </div>
+                    }
+
+                    <form id="replyForm_@comment.Id" style="display: none;" method="post" action="/Posts/AddComment">
+                        <input type="hidden" name="postId" value="@Model.Post.Id" />
+                        <input type="hidden" name="parentCommentId" value="@comment.Id" />
+                        <label for="commentText">Add Reply:</label>
+                        <input type="text" name="commentText" />
+                        <button type="submit">Submit Reply</button>
+                    </form>
+                </div>
             }
 
             <!-- Comment form -->

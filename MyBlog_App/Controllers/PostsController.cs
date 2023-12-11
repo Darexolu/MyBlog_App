@@ -99,7 +99,7 @@ namespace MyBlog_App.Controllers
         private PostViewModel GetPostWithComments(int postId)
         {
             var post = _dbContext.PostModels
-                .Include(p => p.Comments)
+                .Include(p => p.Comments).ThenInclude(c => c.Replies)
                 .Include(p => p.Likes)
                 .FirstOrDefault(p => p.Id == postId);
 
@@ -128,6 +128,17 @@ namespace MyBlog_App.Controllers
                         Text = comment.Text,
                         CreatedAt = comment.CreatedAt,
                         PostId = comment.PostId,
+                        ReplyToUserName = comment.ReplyToUserName,
+                        ReplyToCommentText = comment.ReplyToCommentText,
+                        Replies = comment.Replies.Select(reply => new CommentModel
+                        {
+                            Id = reply.Id,
+                            UserName = reply.UserName,
+                            Text = reply.Text,
+                            CreatedAt = reply.CreatedAt,
+                            PostId = reply.PostId,
+                            ParentCommentId = reply.ParentCommentId
+                        }).ToList()
                     }).ToList(),
                     Likes = post.Likes.Select(like => new LikeModel
                     {
@@ -395,7 +406,7 @@ namespace MyBlog_App.Controllers
 
         [HttpPost]
         [Authorize(Roles = "User")]
-        public IActionResult AddComment(int postId, string commentText)
+        public IActionResult AddComment(int postId, int? parentCommentId, string commentText)
         {
             try
             {
@@ -417,9 +428,17 @@ namespace MyBlog_App.Controllers
                     Text = commentText,
                     UserName = username,
                     CreatedAt = DateTime.Now,
-                   UserId = userId
+                   UserId = userId,
+                    ParentCommentId = parentCommentId
                     // Other properties you may need
                 };
+                var parentComment = post.Comments.FirstOrDefault(c => c.Id == parentCommentId);
+
+                if (parentComment != null)
+                {
+                    newComment.ReplyToUserName = parentComment.UserName;
+                    newComment.ReplyToCommentText = parentComment.Text;
+                }
 
                 // Add the comment to the post
                 post.Comments.Add(newComment);

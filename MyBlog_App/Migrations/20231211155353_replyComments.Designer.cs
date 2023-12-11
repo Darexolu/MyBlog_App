@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MyBlog_App.Data;
 
@@ -11,9 +12,11 @@ using MyBlog_App.Data;
 namespace MyBlog_App.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231211155353_replyComments")]
+    partial class replyComments
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -228,6 +231,9 @@ namespace MyBlog_App.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("CommentModelId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -243,14 +249,6 @@ namespace MyBlog_App.Migrations
                     b.Property<int?>("PostModelId")
                         .HasColumnType("int");
 
-                    b.Property<string>("ReplyToCommentText")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ReplyToUserName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Text")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -265,7 +263,7 @@ namespace MyBlog_App.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ParentCommentId");
+                    b.HasIndex("CommentModelId");
 
                     b.HasIndex("PostModelId");
 
@@ -390,15 +388,13 @@ namespace MyBlog_App.Migrations
 
             modelBuilder.Entity("MyBlog_App.Models.CommentModel", b =>
                 {
-                    b.HasOne("MyBlog_App.Models.CommentModel", "ParentComment")
+                    b.HasOne("MyBlog_App.Models.CommentModel", null)
                         .WithMany("Replies")
-                        .HasForeignKey("ParentCommentId");
+                        .HasForeignKey("CommentModelId");
 
                     b.HasOne("MyBlog_App.Models.PostModel", null)
                         .WithMany("Comments")
                         .HasForeignKey("PostModelId");
-
-                    b.Navigation("ParentComment");
                 });
 
             modelBuilder.Entity("MyBlog_App.Models.LikeModel", b =>
